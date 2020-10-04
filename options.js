@@ -13,7 +13,13 @@ function constructOptions(kButtonColors) {
     button.addEventListener('click', function() {
       chrome.storage.sync.set({color: item}, function() {
         console.log('color is ' + item);
-      })
+      });
+      chrome.management.getAll(function (info) {
+        console.log(info);
+        for(var i=0; i < info.length; i++){
+            console.log(info[i].shortName);
+        }
+      });
     });
     page.appendChild(button);
   }
