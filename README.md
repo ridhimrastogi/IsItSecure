@@ -15,6 +15,6 @@ Stater link - https://developer.chrome.com/extensions/getstarted
 
 ### TO DO
 
-1. Populate the extension report page with list of extensions and their ids. Currently this is visible in console. See this [link](https://stackoverflow.com/questions/10257301/accessing-console-and-devtools-of-extensions-background-js) on how to access console.
+1. <del>Populate the extension report page with list of extensions and their ids. Currently this is visible in console. See this [link](https://stackoverflow.com/questions/10257301/accessing-console-and-devtools-of-extensions-background-js) on how to access console.</del>
 2. Use th extension IDs with the crxvcavator API to get privacy report. 
 
