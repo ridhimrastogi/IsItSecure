@@ -4,16 +4,19 @@
 
 'use strict';
 
-chrome.runtime.onInstalled.addListener(function() {
-  chrome.storage.sync.set({color: '#3aa757'}, function() {
-    console.log('The color is green.');
-  });
-  chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-    chrome.declarativeContent.onPageChanged.addRules([{
-      conditions: [new chrome.declarativeContent.PageStateMatcher({
-        pageUrl: {hostEquals: 'developer.chrome.com'},
-      })],
-      actions: [new chrome.declarativeContent.ShowPageAction()]
-    }]);
-  });
-});
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+      switch (request.directive) {
+      case "popup-click":
+          console.log("Log here")
+          chrome.management.getAll(function(result){
+            console.log(result);
+          })
+          sendResponse({}); // sending back empty response to sender
+          break;
+      default:
+          // helps debug when request directive doesn't match
+          alert("Unmatched request of '" + request + "' from script to background.js from " + sender);
+      }
+  }
+);

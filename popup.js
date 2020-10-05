@@ -4,20 +4,14 @@
 
 'use strict';
 
-let changeColor = document.getElementById('changeColor');
+var bkg = chrome.extension.getBackgroundPage();
 
-chrome.storage.sync.get('color', function(data) {
-  changeColor.style.backgroundColor = data.color;
-  changeColor.setAttribute('value', data.color);
+function clickHandler() {
+  bkg.console.log("Clicked Run");
+  chrome.runtime.sendMessage({directive: "popup-click"}, function(response) {
+     chrome.tabs.create({ url: 'extension-report.html' });
+    this.close(); // close the popup when the background finishes processing request
 });
+}
 
-changeColor.onclick = function(element) {
-  let color = element.target.value;
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.executeScript(
-        tabs[0].id,
-        {code: 'document.body.style.backgroundColor = "' + color + '";'});
-  });
-};
-
-
+document.getElementById('run_extension').addEventListener('click', clickHandler);
