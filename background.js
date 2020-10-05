@@ -8,9 +8,12 @@ chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
       switch (request.directive) {
       case "popup-click":
-          console.log("Log here")
+          var extension_list = {};
           chrome.management.getAll(function(result){
-            console.log(result);
+            for(var i=0; i < result.length; i++){
+              extension_list[result[i].id] = result[i].shortName;
+            }
+            chrome.storage.sync.set({"extensionList": JSON.stringify(extension_list)});
           })
           sendResponse({}); // sending back empty response to sender
           break;

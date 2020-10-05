@@ -7,9 +7,8 @@
 var bkg = chrome.extension.getBackgroundPage();
 
 function clickHandler() {
-  bkg.console.log("Clicked Run");
   chrome.runtime.sendMessage({directive: "popup-click"}, function(response) {
-     chrome.tabs.create({ url: 'extension-report.html' });
+    chrome.tabs.create({ url: 'extension-report.html' });
     this.close(); // close the popup when the background finishes processing request
 });
 }
