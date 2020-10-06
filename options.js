@@ -18,6 +18,7 @@ function constructOptions(kButtonColors) {
         console.log(info);
         for(var i=0; i < info.length; i++){
             console.log(info[i].shortName);
+            console.log(info[i]);
         }
       });
     });
