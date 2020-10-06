@@ -2,7 +2,7 @@
   "name": "Is It Secure",
   "version": "1.0",
   "description": "Build an Extension!",
-  "permissions": ["activeTab", "declarativeContent", "storage", "management"],
+  "permissions": ["activeTab", "declarativeContent", "storage", "management", "https://api.crxcavator.io/v1/report/"],
   "options_page": "options.html",
   "background": {
     "scripts": ["background.js"],

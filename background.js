@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener(
           var extension_list = {};
           chrome.management.getAll(function(result){
             for(var i=0; i < result.length; i++){
-              extension_list[result[i].id] = result[i].shortName;
+              extension_list[result[i].id] = {'name': result[i].shortName, 'version': result[i].version };
             }
             chrome.storage.sync.set({"extensionList": JSON.stringify(extension_list)});
           })
