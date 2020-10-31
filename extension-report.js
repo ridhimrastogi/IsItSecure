@@ -35,8 +35,35 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
             		}
             	}
             }
+            response = await fetch("https://api.crxcavator.io/v1/report/"+ key);
+            result = await response.json();
+            data = []
+            for(let res in result){
+                console.log(extensionList[key].name + " " + result[res].version + " " + result[res].data.risk.total);
+                data.push({x: res, y: result[res].data.risk.total});
+            }
+            console.log(data);
+            const newDiv = document.createElement("div");
+            newDiv.setAttribute("id", extensionList[key].name);
+            const currentDiv = document.getElementById("chartContainer"); 
+            document.body.insertBefore(newDiv, currentDiv);
+            var chart = new CanvasJS.Chart(extensionList[key].name, {
+                animationEnabled: true,
+                theme: "light2",
+                title:{
+                    text: "Simple Line Chart"
+                },
+                data: [{        
+                    type: "line",
+                    indexLabelFontSize: 16,
+                    dataPoints: data
+                }]
+            });
+            chart.render();           
             relatedExtensions.innerHTML = relatedExtensionsList; // return a list of relevant extensions with a better risk score
+            
         }
     }
+    
 });
 
