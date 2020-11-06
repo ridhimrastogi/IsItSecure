@@ -45,6 +45,14 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
             extension.innerHTML = extensionList[key].name + ": " + riskScore.innerHTML;
             const related = document.createElement("div");
             const t = document.createElement("table");
+            let tdd = document.createElement("tr");
+            let trr = document.createElement("td");
+            let trr1 = document.createElement("td");
+            trr.innerHTML = "Related";
+            trr1.innerHTML = "Risk Score";
+            tdd.appendChild(trr);
+            tdd.appendChild(trr1);
+            t.appendChild(tdd);
             relatedWithRisk.forEach(rel => {
                 let tr = document.createElement("tr");
                 rel.forEach(r => {
