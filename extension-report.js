@@ -22,6 +22,7 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
             riskScore.innerHTML = result.data.risk.total;
             bkg.console.log(result.data.webstore.icon);
             var relatedExtensionsList = [];
+            var relatedWithRisk = [];
             for(let relatedExtensionKey in result.data.related) {
             	var relatedExtensionsResponse = await fetch("https://api.crxcavator.io/v1/report/"+ relatedExtensionKey +"/");
             	if (relatedExtensionsResponse != null && relatedExtensionsResponse.status == 200) {
@@ -30,33 +31,61 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
         			if (relatedExtensionsResult != null && relatedExtensionsResult[relatedExtensionsResult.length - 1] != null) {
         				var relatedExtensionRiskScore = relatedExtensionsResult[relatedExtensionsResult.length - 1].data.risk.total;
 	            		if (result.data.risk.total > relatedExtensionRiskScore) {
-	            			relatedExtensionsList.push(result.data.related[relatedExtensionKey].name);
+                            relatedExtensionsList.push(result.data.related[relatedExtensionKey].name);
+                            relatedWithRisk.push([ result.data.related[relatedExtensionKey].name, relatedExtensionRiskScore ]);
 	            		}
             		}
             	}
-            }
-            response = await fetch("https://api.crxcavator.io/v1/report/"+ key);
-            result = await response.json();
-            data = []
+            }            
+            
+            const newDiv = document.createElement("div");
+            const section = document.createElement("section");
+            
+            const extension = document.createElement("h1");
+            extension.innerHTML = extensionList[key].name + ": " + riskScore.innerHTML;
+            const related = document.createElement("div");
+            const t = document.createElement("table");
+            relatedWithRisk.forEach(rel => {
+                let tr = document.createElement("tr");
+                rel.forEach(r => {
+                    let td = document.createElement("td");
+                    td.innerHTML = r;
+                    tr.appendChild(td);
+                });
+                t.appendChild(tr);
+            });
+            related.appendChild(t);
+            
+            section.appendChild(extension);
+            section.appendChild(newDiv);
+            section.appendChild(related);
+            newDiv.setAttribute("id", extensionList[key].name);
+            newDiv.setAttribute("style", "width: 100%; height: 400px;display: inline-block;");
+            const currentDiv = document.getElementById("chartContainer"); 
+
+            var response = await fetch("https://api.crxcavator.io/v1/report/"+ key);
+            var result = await response.json();
+            var riskOverTime = [];
             for(let res in result){
                 console.log(extensionList[key].name + " " + result[res].version + " " + result[res].data.risk.total);
-                data.push({x: res, y: result[res].data.risk.total});
+                riskOverTime.push({y: result[res].data.risk.total});
             }
-            console.log(data);
-            const newDiv = document.createElement("div");
-            newDiv.setAttribute("id", extensionList[key].name);
-            const currentDiv = document.getElementById("chartContainer"); 
-            document.body.insertBefore(newDiv, currentDiv);
-            var chart = new CanvasJS.Chart(extensionList[key].name, {
+            
+            document.body.insertBefore(section, currentDiv);
+            let chart = new CanvasJS.Chart(extensionList[key].name, {
                 animationEnabled: true,
-                theme: "light2",
                 title:{
-                    text: "Simple Line Chart"
+                    text: extensionList[key].name
+                },
+                // height: 400,
+                axisX: {
+                    minimum: 0,
+                    interval: 1,
                 },
                 data: [{        
                     type: "line",
                     indexLabelFontSize: 16,
-                    dataPoints: data
+                    dataPoints: riskOverTime
                 }]
             });
             chart.render();           
