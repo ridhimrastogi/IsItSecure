@@ -4,26 +4,19 @@ var bkg = chrome.extension.getBackgroundPage();
 chrome.storage.sync.get(['extensionList'], async function(list) {
     let extensionList = list.extensionList || {};
     extensionList = JSON.parse(extensionList);
-    var table = document.getElementById("extensionTable");
     bkg.console.log(extensionList);
-    var rowCount = table.rows.length;
     for(let key in extensionList) {
         bkg.console.log(key + ":" +extensionList[key])
         if(extensionList[key].name != "Is It Secure") {
-            var response = await fetch("https://api.crxcavator.io/v1/report/"+ key +"/" +extensionList[key].version)
+            var response = await fetch("https://api.crxcavator.io/v1/report/"+ key +"/" + extensionList[key].version)
+            if(response == null || response.status != 200)
+                continue;
             var result = await response.json();
-            var row = table.insertRow(rowCount++);
-            var name = row.insertCell(0);
-            var id = row.insertCell(1);
-            var riskScore = row.insertCell(2);
-            var relatedExtensions = row.insertCell(3);
-            name.innerHTML = extensionList[key].name;
-            id.innerHTML = key;
-            riskScore.innerHTML = result.data.risk.total;
-            bkg.console.log(result.data.webstore.icon);
+            riskScore = result.data.risk.total;
+            bkg.console.log(result.data);
             var relatedExtensionsList = [];
             var relatedWithRisk = [];
-            for(let relatedExtensionKey in result.data.related) {
+                for(let relatedExtensionKey in result.data.related) {
             	var relatedExtensionsResponse = await fetch("https://api.crxcavator.io/v1/report/"+ relatedExtensionKey +"/");
             	if (relatedExtensionsResponse != null && relatedExtensionsResponse.status == 200) {
             		var relatedExtensionsResult = await relatedExtensionsResponse.json();
@@ -36,14 +29,85 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
 	            		}
             		}
             	}
-            }            
-            
-            const newDiv = document.createElement("div");
+            }
+
+            var score=result.data.risk;
             const section = document.createElement("section");
-            
-            const extension = document.createElement("h1");
-            extension.innerHTML = extensionList[key].name + ": " + riskScore.innerHTML;
+            const button = document.createElement("button")
+            button.innerHTML = extensionList[key].name + ": " + riskScore;
+            button.className = "collapsible"
+
+            var response = await fetch("https://api.crxcavator.io/v1/report/"+ key);
+            var result = await response.json();
+            var riskOverTime = [];
+            var latest_version = 0;
+            for(let res in result){
+                bkg.console.log(extensionList[key].name + " " + result[res].version + " " + result[res].data.risk.total);
+                riskOverTime.push({y: result[res].data.risk.total});
+                latest_version = result[res].version;
+            }
+
+            button.addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight){
+                content.style.maxHeight = null;
+                } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+
+            const parent = document.createElement("div");
+            parent.className = "content"
+
+            const riskdetails = document.createElement("div");
+            const heading1 = document.createElement("h2")
+            heading1.innerHTML = "Risk Breakdown"
+
+            const list = document.createElement("ul")
+            list.setAttribute("style", "width: 100%;list-style-type: none;display: inline-block;");
+            var item = document.createElement("li");
+            item.setAttribute("style", "font-size:13px;");
+            if(parseFloat(latest_version) > parseFloat(extensionList[key].version))
+            {
+                item.innerHTML = "Updated to Latest version: False"
+            }
+            else{
+                item.innerHTML = "Updated to Latest version: True"
+            }
+            list.appendChild(item);
+            for (let sc in score) {
+                if( sc == "metadata")
+                {  continue; }
+                var item = document.createElement("li");
+                item.setAttribute("style", "font-size:13px;");
+                if (sc == "csp") {
+                    item.innerHTML = "CSP score: " + score.csp.total;
+                } else if (sc == "permissions") {
+                    item.innerHTML = "Permissions score: " + score.permissions.total;
+                }else if (sc == "extcalls") {
+                    item.innerHTML = "External Calls score: " + score.extcalls.total;
+                }
+                if (sc == "webstore") {
+                    item.innerHTML = "Webstore score: " + score.webstore.total;
+                }
+                if (sc == "optional_permissions") {
+                    item.innerHTML = "Optional Permissions score: " + score.optional_permissions.total;
+                }
+                if (sc == "retire") {
+                    item.innerHTML = "Retired(Outdated) libraries score: " + score.retire.total;
+                }
+                list.appendChild(item);
+            }
+
+            riskdetails.appendChild(heading1);
+            riskdetails.appendChild(list)
+
             const related = document.createElement("div");
+            related.setAttribute("style", "width: 100%;display: inline-block;");
+            const heading2 = document.createElement("h2")
+            heading2.innerHTML = "Related Extensions and Risk scores"
+
             const t = document.createElement("table");
             let tdd = document.createElement("tr");
             let trr = document.createElement("td");
@@ -62,45 +126,50 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
                 });
                 t.appendChild(tr);
             });
+            related.appendChild(heading2);
             related.appendChild(t);
-            
-            section.appendChild(extension);
-            section.appendChild(newDiv);
-            section.appendChild(related);
-            newDiv.setAttribute("id", extensionList[key].name);
-            newDiv.setAttribute("style", "width: 100%; height: 400px;display: inline-block;");
-            const currentDiv = document.getElementById("chartContainer"); 
 
-            var response = await fetch("https://api.crxcavator.io/v1/report/"+ key);
-            var result = await response.json();
-            var riskOverTime = [];
-            for(let res in result){
-                console.log(extensionList[key].name + " " + result[res].version + " " + result[res].data.risk.total);
-                riskOverTime.push({y: result[res].data.risk.total});
-            }
-            
+            const versionchart = document.createElement("div");
+            versionchart.setAttribute("id", extensionList[key].name);
+            versionchart.setAttribute("style", "width: 100%;display: block;");
+
+            parent.appendChild(riskdetails);
+            parent.appendChild(related);
+            parent.appendChild(versionchart);
+
+            section.appendChild(button);
+            section.appendChild(parent);
+
+            const currentDiv = document.getElementById("chartContainer");
+
             document.body.insertBefore(section, currentDiv);
-            let chart = new CanvasJS.Chart(extensionList[key].name, {
-                animationEnabled: true,
+            const chart = new CanvasJS.Chart(extensionList[key].name, {
                 title:{
-                    text: extensionList[key].name
+                    text:  "Risk Score across Versions for " + extensionList[key].name
                 },
-                // height: 400,
+                toolTip:{
+                    enabled: false
+                },
+                backgroundColor: "#F5DEB3",
+                height: 400,
                 axisX: {
                     minimum: 0,
-                    interval: 1,
+                //    interval: 1,
+                    title: "versions"
                 },
-                data: [{        
+                axisY:{
+                    title : "Risk score"
+                },
+                data: [{
                     type: "line",
                     indexLabelFontSize: 16,
                     dataPoints: riskOverTime
                 }]
             });
-            chart.render();           
-            relatedExtensions.innerHTML = relatedExtensionsList; // return a list of relevant extensions with a better risk score
-            
+            chart.render();
         }
     }
-    
 });
+
+
 
