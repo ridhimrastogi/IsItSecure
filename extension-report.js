@@ -154,7 +154,7 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
                 height: 400,
                 axisX: {
                     minimum: 0,
-                //    interval: 1,
+                   interval: 1,
                     title: "versions"
                 },
                 axisY:{
