@@ -35,3 +35,13 @@
   .active:after {
     content: "\2796"; /* Unicode character for "minus" sign (-) */
   }
+
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .bigFont li {
+    font-size: 15px;
+  }

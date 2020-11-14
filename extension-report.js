@@ -65,9 +65,9 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
             heading1.innerHTML = "Risk Breakdown"
 
             const list = document.createElement("ul")
+            list.className = "bigFont"
             list.setAttribute("style", "width: 100%;list-style-type: none;display: inline-block;");
             var item = document.createElement("li");
-            item.setAttribute("style", "font-size:13px;");
             if(parseFloat(latest_version) > parseFloat(extensionList[key].version))
             {
                 item.innerHTML = "Updated to Latest version: False"
@@ -80,7 +80,6 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
                 if( sc == "metadata")
                 {  continue; }
                 var item = document.createElement("li");
-                item.setAttribute("style", "font-size:13px;");
                 if (sc == "csp") {
                     item.innerHTML = "CSP score: " + score.csp.total;
                 } else if (sc == "permissions") {
