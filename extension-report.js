@@ -32,6 +32,11 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
             }
 
             var score=result.data.risk;
+            var permissions = null;
+            if(result.data.manifest.permissions != null){
+                permissions = result.data.manifest.permissions;
+            }
+
             const section = document.createElement("section");
             const button = document.createElement("button")
             button.innerHTML = extensionList[key].name + ": " + riskScore;
@@ -96,6 +101,12 @@ chrome.storage.sync.get(['extensionList'], async function(list) {
                 if (sc == "retire") {
                     item.innerHTML = "Retired(Outdated) libraries score: " + score.retire.total;
                 }
+                list.appendChild(item);
+            }
+
+            if(permissions != null && permissions.length > 0){
+                var item = document.createElement("li");
+                item.innerHTML = "Permission Details: " + permissions;
                 list.appendChild(item);
             }
 
